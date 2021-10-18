@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.empresa.entity.Docente;
+import com.empresa.entity.FiltroDocente;
+import com.empresa.entity.FiltroModalidad;
 import com.empresa.entity.Modalidad;
 import com.empresa.service.ModalidadService;
 import com.empresa.util.Constantes;
@@ -26,7 +30,7 @@ public class ModalidadController {
 	@Autowired
 	private ModalidadService modalidadService;
 
-	@GetMapping
+	@GetMapping("/listaModalidad")
 	@ResponseBody
 	public ResponseEntity<List<Modalidad>> listaAlumno() {
 		List<Modalidad> lista = modalidadService.listaModalidad();
@@ -50,5 +54,30 @@ public class ModalidadController {
 		}
 		return ResponseEntity.ok(salida);
 	}
+	
+	@GetMapping("/porSedeNombreConJson")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> listaPrSedeNombreJson(@RequestBody FiltroModalidad filtro) {
+
+		Map<String, Object> salida = new HashMap<String, Object>();
+		try {
+			filtro.setNombre("%" + filtro.getNombre() + "%");
+			List<Modalidad> lista = modalidadService.listaPorFiltro(filtro);
+			if (CollectionUtils.isEmpty(lista)) {
+				salida.put("mensaje", "No existe elementos para la consulta");
+			} else {
+				salida.put("lista", lista);
+				salida.put("mensaje", "Se tiene " + lista.size() + " elementos");
+			}
+		} catch (Exception e) {
+			salida.put("mensaje", "Error : " + e.getMessage());
+		}
+
+		return ResponseEntity.ok(salida);
+	}
+	
+	
+	
+	
 
 }
